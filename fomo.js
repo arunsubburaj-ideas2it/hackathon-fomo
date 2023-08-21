@@ -5,7 +5,7 @@ class FOMOBox extends HTMLElement {
     }
 
     static get observedAttributes() {
-        return ['delay', 'position', 'enable', 'coupon','offer', 'expiry'];
+        return ['delay', 'position', 'enable', 'coupon', 'offer', 'expiry'];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -89,7 +89,8 @@ class FOMOBox extends HTMLElement {
                 flex-direction: column;
                 justify-content: flex-start;
                 align-items: center;
-                height: 80px;
+                height: 50px;
+                font-weight: bold;
             }
             .middle-sec{
                 background: rgb(255, 255, 255); 
@@ -118,7 +119,6 @@ class FOMOBox extends HTMLElement {
         <div class="root">
             <div class="pop-parent">
             <section class="blue-area">
-                <div style="padding: 5px 0px;">Last-minute Deal!</div>
                 <div style="padding: 5px 0px;">${offer}</div>
             </section>
             <section class="middle-sec">
@@ -126,19 +126,20 @@ class FOMOBox extends HTMLElement {
                 <div class="timer" style="color: rgb(0, 109, 239);">${expiryDate}</div>
             </section>
             <section class="bottom-sec">
-                <p>Coupon code will be copied to clipboard for use...</p>
-                <button class="copyBtn" onclick="copyToClipboard">get now</a>
+                <p>Coupon code will be copied for use...</p>
+                <button class="copyBtn" id="getNow">get now</a>
             </section>
             </div>
         </div>
     `;
+        this.shadowRoot.querySelector("#getNow").addEventListener("click", this.copyToClipboard);
         setTimeout(() => {
             this.shadowRoot.querySelector(".root").classList.add("active")
         }, delay);
     }
     copyToClipboard() {
         const coupon = this.getAttribute("coupon");
-        console.log("fomo button clicked...", coupon)
+        console.log("fomo button clicked...")
     }
 }
 
