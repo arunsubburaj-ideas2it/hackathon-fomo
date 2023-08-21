@@ -132,7 +132,7 @@ class FOMOBox extends HTMLElement {
                 justify-content: flex-start;
                 align-items: center;
                 font-weight: bold;
-                height: 50px;
+                height: 70px;
             }
             .middle-sec{
                 background: #2DDFA0;
@@ -213,9 +213,18 @@ class FOMOBox extends HTMLElement {
         this.shadowRoot.querySelector(".closeBtn").addEventListener("click", this.closePopup.bind(this));
         this.shadowRoot.querySelector(".fomo-button").addEventListener("click", this.openPopup.bind(this));
     }
-    copyToClipboard() {
+    async copyToClipboard() {
         const coupon = this.getAttribute("coupon");
-        console.log("fomo button clicked...", coupon)
+        console.log("fomo button clicked...", coupon);
+        if (navigator.clipboard && window.isSecureContext) {
+            try {
+              await navigator.clipboard.writeText(coupon);
+              console.log("Content copied to clipboard using navigator.clipboard");
+              this.closePopup();
+            } catch (error) {
+              console.error("failed to copy using navigator.clipboard", error);
+            }
+        }
     }
     closePopup() {
         var popoverEle = this.shadowRoot.querySelector(".root");
