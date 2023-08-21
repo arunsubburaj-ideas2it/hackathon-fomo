@@ -14,6 +14,7 @@ class FOMOBox extends HTMLElement {
 
     connectedCallback() {
         this.render();
+        this.wireEvents();
     }
 
     getInitialPositionStyle(position) {
@@ -51,59 +52,107 @@ class FOMOBox extends HTMLElement {
         const offer = this.getAttribute("offer") || "5% Offer!!!";
         const coupon = this.getAttribute("coupon") || "EE234FR@@#34";
         const expiry = this.getAttribute("expiry") || "2023/08/25";
-        const expiryDate = new Date(expiry).toLocaleDateString();
+        const expiryDate = new Date(expiry).toDateString();
         this.shadowRoot.innerHTML = `
         <style>
-            .root {
+            .fomo-button {
                 display: ${enable ? 'block' : 'none'};
                 position: fixed;
                 ${this.getInitialPositionStyle(position)};
                 transition: all 0.75s;
-                padding: 10px;
-                border: 1px solid #ccc;
                 z-index: 9999;
                 opacity: 0;
-                border-radius: 30px;
-                box-shadow: 0px 0px 2px 1px rgba(0,0,0,0.2);
-                max-width: 280px;
+                box-shadow: 0px 0px 5px 5px rgba(0,0,0,0.2);
+                width: 70px;
+                height: 70px;
+                background-image: url("https://cdn.shopify.com/s/files/1/0795/3049/2211/files/nc_store_logo.png?v=1692007311");
+                background-position: center;
+                background-size: cover;
+                background-repeat: no-repeat;
+                border-radius: 50%;
+                cursor: pointer;
             }
-            .root.active {
+            .root-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                z-index: 10000;
+                display: none;
+            }
+            .root-overlay.active {
+                display: block;
+            }
+            .root {
+                display: block;
+                position: fixed;
+                bottom: -100%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                transition: all 0.75s;
+                z-index: 10000;
+                opacity: 0;
+                border-radius: 30px;
+                box-shadow: 0px 0px 5px 3px rgba(0,0,0,0.5);
+                width: 280px;
+                background-color: #fff;
+                text-transform: uppercase;
+            }
+            .root.active{
+                bottom: auto; 
+                top: 50%; 
+                opacity: 1;
+            }
+            .fomo-button.active {
                 opacity: 1;
                 ${this.getPositionStyle(position)};
             }
             .pop-parent {
-                background: rgb(255, 255, 255); 
-                border-radius: 25px; 
-                text-align: center; 
-                display: flex; 
-                flex-direction: column; 
+                background: rgb(255, 255, 255);
+                border-radius: 25px;
+                text-align: center;
+                display: flex;
+                flex-direction: column;
                 align-items: center;
+                position: relative;
+            }
+            .pop-parent > section:not(:last-child) {
+                margin-bottom: 10px;
             }
             .blue-area {
                 width: 100%;
-                background: rgb(0, 110, 240);
+                background: #8777F1;
                 border-radius: 25px;
                 color: rgb(255, 255, 255);
-                padding: 10px 0px;
+                padding: 20px 0px;
                 display: flex;
                 flex-direction: column;
                 justify-content: flex-start;
                 align-items: center;
-                height: 50px;
                 font-weight: bold;
+                height: 50px;
             }
             .middle-sec{
-                background: rgb(255, 255, 255); 
-                width: 70%; 
-                box-shadow: rgb(162, 159, 159) 0px 0px 4px; 
-                padding: 10px 0px; 
-                border-radius: 30px; 
-                position: relative; 
+                background: #2DDFA0;
+                width: 70%;
+                box-shadow: rgb(162, 159, 159) 0px 0px 4px;
+                padding: 15px 0px;
+                border-radius: 30px;
+                position: relative;
                 margin-top: -30px;
+            }
+            .timer {
+                color: #000;
+                font-weight: bold;
+                letter-spacing: 2px;
             }
             .bottom-sec {
                 display: flex;
                 flex-direction: column;
+                width: 80%;
+                padding-bottom: 10px;
             }
             .copyBtn {
                 font-weight: 700;
@@ -112,34 +161,75 @@ class FOMOBox extends HTMLElement {
                 color: rgb(255, 255, 255);
                 border: none;
                 padding: 10px;
+                cursor: pointer;
                 text-transform: uppercase;
+            }
+            .closeBtn {
+                position: absolute;
+                top: -5px;
+                right: -5px;
+                background: #fff;
+                padding: 7px;
+                border-radius: 50%;
+                width: 12px;
+                height: 12px;
+                text-transform: lowercase;
+                text-align: center;
+                font-size: 20px;
+                font-family: sans-serif;
+                line-height: 10px;
+                background: #fff;
+                color: #000;
+                border: 1px solid #ccc;
+                box-shadow: 0px 0px 5px 1px rgba(0,0,0,0.5);
                 cursor: pointer;
             }
         </style>
+        <div class="root-overlay"></div>
         <div class="root">
             <div class="pop-parent">
-            <section class="blue-area">
-                <div style="padding: 5px 0px;">${offer}</div>
-            </section>
-            <section class="middle-sec">
-                <div style="color: rgb(0, 0, 0);">Limited time offer</div>
-                <div class="timer" style="color: rgb(0, 109, 239);">${expiryDate}</div>
-            </section>
-            <section class="bottom-sec">
-                <p>Coupon code will be copied for use...</p>
-                <button class="copyBtn" id="getNow">get now</a>
-            </section>
+                <section class="blue-area">
+                    <div>ONLY FEW MORE DAYS!</div>
+                    <div style="padding: 5px 0px;">${expiryDate}</div>
+                </section>
+                <section class="middle-sec">
+                    <div class="timer">${offer}</div>
+                </section>
+                <section class="bottom-sec">
+                    <p>Coupon code will be copied for use...</p>
+                    <button class="copyBtn" id="getNow">get now</a>
+                </section>
+                <div class="closeBtn">X</div>
             </div>
         </div>
+        <div class='fomo-button'></div>
     `;
-        this.shadowRoot.querySelector("#getNow").addEventListener("click", this.copyToClipboard);
         setTimeout(() => {
-            this.shadowRoot.querySelector(".root").classList.add("active")
+            this.shadowRoot.querySelector(".fomo-button").classList.add("active");
         }, delay);
+    }
+    wireEvents() {
+        this.shadowRoot.querySelector("#getNow").addEventListener("click", this.copyToClipboard.bind(this));
+        this.shadowRoot.querySelector(".closeBtn").addEventListener("click", this.closePopup.bind(this));
+        this.shadowRoot.querySelector(".fomo-button").addEventListener("click", this.openPopup.bind(this));
     }
     copyToClipboard() {
         const coupon = this.getAttribute("coupon");
-        console.log("fomo button clicked...")
+        console.log("fomo button clicked...", coupon)
+    }
+    closePopup() {
+        var popoverEle = this.shadowRoot.querySelector(".root");
+        var popoverOverLayEle = this.shadowRoot.querySelector(".root-overlay");
+        if (!popoverEle) return;
+        popoverOverLayEle.classList.remove("active");
+        popoverEle.classList.remove("active");
+    }
+    openPopup() {
+        var popoverEle = this.shadowRoot.querySelector(".root");
+        var popoverOverLayEle = this.shadowRoot.querySelector(".root-overlay");
+        if (!popoverEle) return;
+        popoverOverLayEle.classList.add("active");
+        popoverEle.classList.add("active");
     }
 }
 
