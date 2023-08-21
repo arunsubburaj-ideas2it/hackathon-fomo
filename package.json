@@ -1,0 +1,11 @@
+{
+  "name": "hackathon_fomo",
+  "version": "1.0.0",
+  "description": "FOMO for Node. app",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "arunkumarsubburaj",
+  "license": "ISC"
+}
